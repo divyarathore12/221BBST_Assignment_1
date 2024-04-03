@@ -1,0 +1,120 @@
+//Bomobj__c and distiobj__c are two custom object having custom Fields Partnumber__c and quantity__c.
+//finalistobj__c is custom object having custom fields bomPartnumber__c,bomqty__c,distiPartnumber__c,distiqty__c,errorFlag__c
+
+//Logic:-
+//first convert list of distiobj__c object into map
+//now we are checking that bom partNumber is present in disti_map(mp) or not
+//if it is present then we are checking if bom quantity== disti quantity then
+// error_flag will be false and assign all fields of bom and disti into finalist object.
+
+// Case 1:-
+// if bom quantity > disti quantity then  assign all fields of bom and disti into finalist object and error_flag will be true
+//  and remove that entry from disti map because disti_quanity can't be splited any more
+
+// case 2:-
+// if bom quantity < disti quantity then assign bomqty__c=distiqty__c=bom quantity;
+// and remaining =disti quantity- bom quantity and now map this remaining to current PartNumber so we can use this in future.
+
+//if bom partNumber is not present in disti_map(mp)
+//then all disti fields will be null and assign bom fields as it is errorFlag will be true.
+
+
+//after doing above operation if still our map has some fields then assign Bom Fields null and disti fields as it is 
+//and errorFlag True;
+
+public class BomDistiHelper {
+ Public Static List<finalistobj__c> Helper(List<Bomobj__c>bom,List<distiobj__c>disti)
+ {
+     Map<String,integer>mp=new Map<string,integer>();
+     List<finalistobj__c>finalList=new List<finalistobj__c>();
+     
+     
+     //mapping list to map
+     for(distiobj__c d:disti)
+     {
+         mp.put(d.Partnumber__c,(integer)d.quantity__c);
+     }
+     
+     
+     
+     //implementing code acc. to problem statement
+     
+     for(Bomobj__c b:bom)
+     {
+       string BoM_PN=b.Partnumber__c;
+         Integer BoM_Qty=(Integer)b.quantity__c;
+         
+         if(mp.containsKey(BoM_PN))
+         {
+            Integer Disti_Qty = mp.get(BoM_PN);
+             if(BoM_Qty==Disti_Qty)
+          {
+              finalistobj__c item=new finalistobj__c();
+              item.bomPartnumber__c=BoM_PN;
+                item.bomqty__c=BoM_Qty;
+               item.distiPartnumber__c=BoM_PN;
+              item.distiqty__c=Disti_Qty;
+              //item.errorFlag__c=false;
+    finalList.add(item);
+              mp.remove(BoM_PN);
+
+          }
+          else if(BoM_Qty>Disti_Qty)
+          {
+              finalistobj__c item=new finalistobj__c();
+              item.bomPartnumber__c=BoM_PN;
+                item.bomqty__c=BoM_Qty;
+               item.distiPartnumber__c=BoM_PN;
+              item.distiqty__c=Disti_Qty;
+              item.errorFlag__c=true;
+    finalList.add(item);
+              mp.remove(BoM_PN);
+
+          }
+             else
+             {
+                 finalistobj__c item=new finalistobj__c();
+              item.bomPartnumber__c=BoM_PN;
+                   item.bomqty__c=BoM_Qty;
+              item.distiPartnumber__c=BoM_PN;
+              item.distiqty__c=BoM_Qty;
+              //item.errorFlag__c=false;
+    finalList.add(item);
+                 integer remaining=Disti_Qty-BoM_Qty;
+                 mp.put(BoM_PN,remaining);
+                 
+             }
+             
+         }
+         
+         else
+         {
+             finalistobj__c item=new finalistobj__c();
+              item.bomPartnumber__c=BoM_PN;
+                  item.bomqty__c=BoM_Qty;
+              item.distiPartnumber__c=null;
+              item.distiqty__c=null;
+              item.errorFlag__c=true;
+    finalList.add(item);
+
+         }
+     }
+     if(!mp.isEmpty())
+     {
+         for (String key : mp.keySet())
+         {
+             finalistobj__c item=new finalistobj__c();
+              item.bomPartnumber__c=null;
+                     item.bomqty__c=null;
+              item.distiPartnumber__c=key;
+              item.distiqty__c=mp.get(key);
+              item.errorFlag__c=true;
+    finalList.add(item);
+         }
+     }
+     
+
+
+     return finalList ;
+ }
+}
