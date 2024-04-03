@@ -1,0 +1,278 @@
+@isTest
+public class TestBomDistiHelper {
+    @isTest
+    static void Compare_Lists_Test() {
+                     Test.startTest();
+        List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'DEF', quantity__c = 2)
+        };
+        //insert bom;
+
+        
+        List<distiobj__c> disti = new List<distiobj__c>{
+            new distiobj__c(Partnumber__c = 'XYZ', quantity__c = 2),
+            new distiobj__c(Partnumber__c = 'GEF', quantity__c = 2),
+            new distiobj__c(Partnumber__c = 'ABC', quantity__c = 4),
+            new distiobj__c(Partnumber__c = 'IJK', quantity__c = 2)
+        };
+        //insert disti;
+
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+
+        
+        System.debug('test_Compare_Lists : Output');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+        for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+        
+        
+        System.assertEquals(9, ActualList.size());
+        System.assertEquals('ABC', ActualList[0].bomPartnumber__c);
+        System.assertEquals(2, ActualList[0].bomqty__c);
+        System.assertEquals('ABC', ActualList[0].distiPartnumber__c);
+        System.assertEquals(2, ActualList[0].distiqty__c);
+        System.assertEquals(false, ActualList[0].errorFlag__c);
+       
+    }
+    
+   
+   
+    
+    // case :- Disti items are missing in BoM
+    @isTest
+    static void DistiItems_MissingInBoM_Test() {
+        // Initialize BoM list with items
+                 Test.startTest();
+         List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'DEF', quantity__c = 2)
+        };
+        // Initialize Disti list with some missing BoM items
+         List<distiobj__c> disti = new List<distiobj__c>{
+            new distiobj__c(Partnumber__c = 'XYZ', quantity__c = 2),
+            new distiobj__c(Partnumber__c = 'GEF', quantity__c = 2),
+            new distiobj__c(Partnumber__c = 'ABC', quantity__c = 4),
+            new distiobj__c(Partnumber__c = 'IJK', quantity__c = 2)
+        };
+             // Call the method to compare lists
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+    
+    
+        // Print the Actual list with System.debug()
+        System.debug('DistiItems_MissingInBoM_Test Output:');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+         for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+    
+        // assertions here to verify the results
+            System.assertEquals(9, ActualList.size());
+            System.assertEquals('ABC', ActualList[0].bomPartnumber__c);
+            System.assertEquals(2, ActualList[0].bomqty__c);
+            System.assertEquals('ABC', ActualList[0].distiPartnumber__c);
+            System.assertEquals(2, ActualList[0].distiqty__c);
+            System.assertEquals(false, ActualList[0].errorFlag__c);
+        }
+    
+    //Case:- for Disti list and Bom list are completely different
+    @isTest
+    static void Disti_ItemsMissingFully_InBoM_Test() {
+        // Initialize BoM list with items
+                    Test.startTest();
+                 List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1)
+        };
+        // Initialize Disti list with items that are not in BoM list
+ List<distiobj__c> disti = new List<distiobj__c>{
+     new distiobj__c(Partnumber__c = 'DEF', quantity__c = 4),
+            new distiobj__c(Partnumber__c = 'LMN', quantity__c = 2)
+        };
+        // Call the method to compare lists
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+        // Print Actual  List
+        System.debug('Disti_ItemsMissingFully_InBoM_Test Output:');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+          for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+        // Assertions
+        // Verify the size of the Actual list
+        System.assertEquals(4, ActualList.size());
+        // Verify the first item in Actual list
+        System.assertEquals('ABC', ActualList[0].bomPartnumber__c);
+        System.assertEquals(2, ActualList[0].bomqty__c);
+        System.assertEquals(true, ActualList[0].errorFlag__c);
+        // Verify the second item in Actual list
+        System.assertEquals('XYZ', ActualList[1].bomPartnumber__c);
+        System.assertEquals(1, ActualList[1].bomqty__c);
+        System.assertEquals(true, ActualList[1].errorFlag__c);
+    }
+    
+    //  case :- BoM Quantity= Disti Quantity
+    @isTest
+    static void Matching_Quantities_Test() {
+        Test.startTest();
+        // Initialize BoM and Disti lists with matching quantities
+        List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1)
+        };
+        List<distiobj__c> disti = new List<distiobj__c>{
+            new distiobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new distiobj__c(Partnumber__c = 'XYZ', quantity__c = 1),
+            new distiobj__c(Partnumber__c = 'IJK', quantity__c = 1)
+        };
+        // Call the method to compare lists
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+        
+        // Verify the Actual list and print it using System.debug()
+        System.debug('Matching_Quantities_Test Output:');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+        for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+        
+        // Add assertions to verify the results
+        System.assertEquals(3, ActualList.size());
+        // 1st item checking
+        System.assertEquals('ABC', ActualList[0].bomPartnumber__c );
+        System.assertEquals(2, ActualList[0].bomqty__c);
+        System.assertEquals('ABC', ActualList[0].distiPartnumber__c);
+        System.assertEquals(2, ActualList[0].distiqty__c);
+        System.assertEquals(false, ActualList[0].errorFlag__c);
+        
+        // 2nd item checking
+        System.assertEquals('XYZ', ActualList[1].bomPartnumber__c);
+        System.assertEquals(1, ActualList[1].bomqty__c);
+        System.assertEquals('XYZ', ActualList[1].distiPartnumber__c);
+        System.assertEquals(1, ActualList[1].distiqty__c);
+        System.assertEquals(false, ActualList[1].errorFlag__c);
+        
+    }
+    
+    
+    //  case:-  Disti quantity > BoM quantity
+    @isTest
+    static void DistiQuantity_GreaterThan_BoM_Test() {
+        Test.startTest();
+        // Initialize BoM list with items and Disti list with quantities greater than BoM
+          List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1)
+        };
+        List<distiobj__c> disti = new List<distiobj__c>{
+            new distiobj__c(Partnumber__c = 'XYZ', quantity__c = 5),
+            new distiobj__c(Partnumber__c = 'GEF', quantity__c = 2)
+        };
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+    
+        // Printing of  Actual List
+        System.debug('DistiQuantity_GreaterThan_BoM_Test output:');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+        for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+        
+    
+        // Assertion to check the size of the Actual List
+        System.assertEquals(4, ActualList.size());
+    
+        // Assertion to check specific items in the Actual List
+        System.assertEquals('ABC', ActualList[0].bomPartnumber__c);
+        System.assertEquals(2, ActualList[0].bomqty__c);
+        System.assertEquals(null, ActualList[0].distiPartnumber__c);
+        System.assertEquals(null, ActualList[0].distiqty__c);
+        System.assertEquals(true, ActualList[0].errorFlag__c);
+        
+        System.assertEquals('XYZ', ActualList[1].bomPartnumber__c);
+        System.assertEquals(1, ActualList[1].bomqty__c);
+        System.assertEquals('XYZ', ActualList[1].distiPartnumber__c);
+        System.assertEquals(1, ActualList[1].distiqty__c);
+        System.assertEquals(false, ActualList[1].errorFlag__c);
+    
+        System.assertEquals(null, ActualList[2].bomPartnumber__c);
+        System.assertEquals(null, ActualList[2].bomqty__c);
+        System.assertEquals('XYZ', ActualList[2].distiPartnumber__c);
+        System.assertEquals(4, ActualList[2].distiqty__c);
+        System.assertEquals(true, ActualList[2].errorFlag__c);
+    }
+    
+    //case: when both lists are Empty
+     @isTest
+    static void EmptyLists_Test() {
+        Test.startTest();
+        // Initialize empty lists
+        List<Bomobj__c> bom = new List<Bomobj__c>();
+        List<distiobj__c> disti = new List<distiobj__c>();
+        // Call the method to compare lists
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+        
+        
+        System.debug('test Empty Lists Output');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+        for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+        // Verify the Actual list is empty
+        System.assertEquals(0,ActualList.size());
+    }
+    
+     //  case:-  BoM list with no Disti items
+    @isTest
+    static void BoM_NoDisti_Test() {
+        // Initialize BoM list with items and  Disti list will be empty
+                Test.startTest();
+       List<Bomobj__c> bom = new List<Bomobj__c>{
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'ABC', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'IJK', quantity__c = 1),
+            new Bomobj__c(Partnumber__c = 'XYZ', quantity__c = 2),
+            new Bomobj__c(Partnumber__c = 'DEF', quantity__c = 2)
+        };
+        
+        // Created empty Disti list
+        List<distiobj__c> disti = new List<distiobj__c>();
+
+        // Call the method to compare lists
+        List<finalistobj__c> ActualList = BomDistiHelper.Helper(bom, disti);
+        Test.stopTest();
+
+        // Debug print
+        System.debug('BoM_NoDisti_Test Output:');
+        System.debug('Bom PN | Bom Qty | Disti PN | Disti Qty | Error Flag');
+      for (finalistobj__c item : ActualList) {
+            System.debug(item.bomPartnumber__c  + ' | ' + item.bomqty__c + ' | ' + item.distiPartnumber__c + ' | ' + item.distiqty__c + ' | ' + item.errorFlag__c);
+        }
+
+        // Assertions
+        System.assertEquals(7, ActualList.size());
+        System.assertEquals('ABC', ActualList[0].bomPartnumber__c);
+        System.assertEquals(2, ActualList[0].bomqty__c);
+        System.assertEquals(null, ActualList[0].distiPartnumber__c);
+        System.assertEquals(null, ActualList[0].distiqty__c);
+        System.assertEquals(true, ActualList[0].errorFlag__c);
+        
+    }
+}
