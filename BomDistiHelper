@@ -32,7 +32,18 @@ public class BomDistiHelper {
      //mapping list to map
      for(distiobj__c d:disti)
      {
+
+ if(disti.containsKey(d.disti_pn__c))
+             {
+                 integer t=(integer)disti.get(d.Partnumber__c);
+                 t+=(integer)d.quantity__c;
          mp.put(d.Partnumber__c,(integer)d.quantity__c);
+             }
+             else
+             {
+         mp.put(d.Partnumber__c,(integer)d.quantity__c);
+             }
+           
      }
      
      
